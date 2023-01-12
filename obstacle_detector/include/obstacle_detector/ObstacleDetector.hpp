@@ -28,4 +28,4 @@ get_obstacle(const std::vector<float> & distances, float angle_min, float angle_
 
 }  // namespace obstacle_detector
 
-#endif  // OBSTACLE_DETECTOR__OBSTACLEDETECTORNODE_HPP_
+#endif  // OBSTACLE_DETECTOR__OBSTACLEDETECTOR_HPP_

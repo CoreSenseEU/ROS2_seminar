@@ -36,7 +36,8 @@ ObstacleDetectorNode::ObstacleDetectorNode(const rclcpp::NodeOptions & options)
 : Node("obstacle_detector", options)
 {
   scan_sub_ = create_subscription<sensor_msgs::msg::LaserScan>(
-    "input_scan", rclcpp::SensorDataQoS(), std::bind(&ObstacleDetectorNode::scan_callback, this, _1));
+    "input_scan", rclcpp::SensorDataQoS(),
+    std::bind(&ObstacleDetectorNode::scan_callback, this, _1));
   obstacle_pub_ = create_publisher<geometry_msgs::msg::PointStamped>("obstacle_pose", 100);
 
   timer_ = create_wall_timer(50ms, std::bind(&ObstacleDetectorNode::control_cycle, this));
@@ -61,14 +62,14 @@ ObstacleDetectorNode::control_cycle()
   if (obstacle_pub_->get_subscription_count() > 0 && obstacle_coord.has_value()) {
     obstacle_pub_->publish(obstacle_coord.value());
   }
-
 }
 
 std::optional<geometry_msgs::msg::PointStamped>
 ObstacleDetectorNode::get_obstacle(const sensor_msgs::msg::LaserScan & scan)
 {
-  auto obstacle_coord = obstacle_detector::get_obstacle(scan.ranges, scan.angle_min, scan.angle_increment);
-  
+  auto obstacle_coord = obstacle_detector::get_obstacle(
+    scan.ranges, scan.angle_min, scan.angle_increment);
+
   if (!obstacle_coord.has_value()) {
     return {};
   }

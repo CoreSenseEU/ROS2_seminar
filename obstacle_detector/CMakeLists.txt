@@ -21,7 +21,7 @@ set(dependencies
 
 include_directories(include)
 
-add_library(${PROJECT_NAME} SHARED 
+add_library(${PROJECT_NAME} SHARED
   src/obstacle_detector/ObstacleDetectorNode.cpp
   src/obstacle_detector/ObstacleDetector.cpp
 )
