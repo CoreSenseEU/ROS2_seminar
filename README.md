@@ -2,7 +2,7 @@
 [![main](https://github.com/CoreSenseEU/ROS2_seminar/actions/workflows/main.yaml/badge.svg)](https://github.com/CoreSenseEU/ROS2_seminar/actions/workflows/main.yaml)
 [![codecov](https://codecov.io/gh/CoreSenseEU/ROS2_seminar/branch/master/graph/badge.svg)](https://codecov.io/gh/CoreSenseEU/ROS2_seminar)
 
-This repository contains an example ros2 package quality1 according to the Coresense project guidelines.
+This repository contains an example ros2 package quality 1 according to the Coresense project guidelines.
 
 ## Install and building
 
@@ -32,8 +32,8 @@ $ ros2 run obstacle_detector obstacle_detector_main --ros-args -r input_scan:=/s
   * Publishers:
     * `/obstacle_pose` `[geometry_msgs/msg/PointStamped]` 
   * Subscribers:
-    * `/input_scan   ` `[geometry_msgs/msg/PointStamped]` 
+    * `/input_scan   ` `[sensor_msgs/msg/LaserScan]` 
 
 ## Acknowledgments
 
-<img src="https://coresenseeu.github.io/_images/funding.png" width="200" height="50">
+<img src="https://coresenseeu.github.io/_images/funding.png" width="400" height="100">
