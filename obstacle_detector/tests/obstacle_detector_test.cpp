@@ -19,6 +19,7 @@
 #include "sensor_msgs/msg/laser_scan.hpp"
 #include "geometry_msgs/msg/point_stamped.hpp"
 #include "obstacle_detector/ObstacleDetectorNode.hpp"
+#include "obstacle_detector/ObstacleDetector.hpp"
 
 #include "gtest/gtest.h"
 
@@ -73,6 +74,35 @@ sensor_msgs::msg::LaserScan get_scan_test_3(rclcpp::Time ts)
 
 
 TEST(obstacle_detector_tests, get_obstacle)
+{
+  auto node_obstacle = rclcpp::Node::make_shared("node_obstacle");
+
+  rclcpp::Time ts = node_obstacle->now();
+
+  sensor_msgs::msg::LaserScan scan1 = get_scan_test_1(ts);
+  sensor_msgs::msg::LaserScan scan2 = get_scan_test_2(ts);
+  sensor_msgs::msg::LaserScan scan3 = get_scan_test_3(ts);
+
+  auto res1 = obstacle_detector::get_obstacle(
+    scan1.ranges, scan1.angle_min, scan1.angle_increment);
+  ASSERT_FALSE(res1.has_value());
+
+  auto res2 = obstacle_detector::get_obstacle(
+    scan2.ranges, scan2.angle_min, scan2.angle_increment);
+  ASSERT_TRUE(res2.has_value());
+  ASSERT_NEAR(res2.value().x(), 0.0f, 0.00001f);
+  ASSERT_NEAR(res2.value().y(), 0.0f, 0.00001f);
+  ASSERT_NEAR(res2.value().z(), 0.0f, 0.00001f);
+
+  auto res3 = obstacle_detector::get_obstacle(
+    scan3.ranges, scan3.angle_min, scan3.angle_increment);
+  ASSERT_TRUE(res3.has_value());
+  ASSERT_LT(res3.value().x(), -0.0f);
+  ASSERT_LT(res3.value().y(), -0.0f);
+  ASSERT_NEAR(res3.value().z(), 0.0f, 0.00001f);
+}
+
+TEST(obstacle_detector_tests, get_obstacle_node)
 {
   auto node_obstacle = ObstacleDetectorNodeTest();
 

@@ -30,7 +30,7 @@ namespace obstacle_detector
 class ObstacleDetectorNode : public rclcpp::Node
 {
 public:
-  ObstacleDetectorNode(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
+  explicit ObstacleDetectorNode(const rclcpp::NodeOptions & options = rclcpp::NodeOptions());
 
   void scan_callback(sensor_msgs::msg::LaserScan::UniquePtr msg);
   void control_cycle();
@@ -42,7 +42,7 @@ protected:
 private:
   rclcpp::Subscription<sensor_msgs::msg::LaserScan>::SharedPtr scan_sub_;
   rclcpp::Publisher<geometry_msgs::msg::PointStamped>::SharedPtr obstacle_pub_;
-   rclcpp::TimerBase::SharedPtr timer_;
+  rclcpp::TimerBase::SharedPtr timer_;
 
   sensor_msgs::msg::LaserScan::UniquePtr last_scan_;
 };
