@@ -14,8 +14,6 @@
 
 
 #include <memory>
-#include <utility>
-#include <algorithm>
 #include <vector>
 #include <optional>
 
@@ -23,6 +21,8 @@
 
 #include "obstacle_detector/ObstacleDetectorNode.hpp"
 #include "geometry_msgs/msg/point_stamped.hpp"
+
+#include "obstacle_detector/ObstacleDetector.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 
@@ -67,23 +67,18 @@ ObstacleDetectorNode::control_cycle()
 std::optional<geometry_msgs::msg::PointStamped>
 ObstacleDetectorNode::get_obstacle(const sensor_msgs::msg::LaserScan & scan)
 {
-  geometry_msgs::msg::PointStamped ret;
-  ret.header = scan.header;
-
-  // Get the index of nearest obstacle
-  int min_idx = std::min_element(scan.ranges.begin(), scan.ranges.end()) - scan.ranges.begin();
-
-  // Get the distance to nearest obstacle
-  float distance_min = scan.ranges[min_idx];
-  float angle = scan.angle_min + scan.angle_increment * min_idx;
-
-  if (std::isinf(distance_min) || std::isnan(distance_min)) {
+  auto obstacle_coord = obstacle_detector::get_obstacle(scan.ranges, scan.angle_min, scan.angle_increment);
+  
+  if (!obstacle_coord.has_value()) {
     return {};
   }
 
-  ret.point.x = cos(angle) * distance_min;
-  ret.point.y = sin(angle) * distance_min;
-  ret.point.z = 0.0;
+  geometry_msgs::msg::PointStamped ret;
+  ret.header = scan.header;
+
+  ret.point.x = obstacle_coord.value().x();
+  ret.point.y = obstacle_coord.value().y();
+  ret.point.z = obstacle_coord.value().z();
 
   return ret;
 }

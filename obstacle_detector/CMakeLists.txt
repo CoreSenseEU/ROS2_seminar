@@ -9,17 +9,22 @@ find_package(rclcpp REQUIRED)
 find_package(rclcpp_components REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
+find_package(tf2 REQUIRED)
 
 set(dependencies
     rclcpp
     rclcpp_components
     sensor_msgs
     geometry_msgs
+    tf2
 )
 
 include_directories(include)
 
-add_library(${PROJECT_NAME} SHARED src/obstacle_detector/ObstacleDetectorNode.cpp)
+add_library(${PROJECT_NAME} SHARED 
+  src/obstacle_detector/ObstacleDetectorNode.cpp
+  src/obstacle_detector/ObstacleDetector.cpp
+)
 ament_target_dependencies(${PROJECT_NAME} ${dependencies})
 rclcpp_components_register_nodes(${PROJECT_NAME} "obstacle_detector::AvoidanceNode")
 
@@ -29,10 +34,14 @@ target_link_libraries(obstacle_detector_main ${PROJECT_NAME})
 
 install(TARGETS
   ${PROJECT_NAME}
-  obstacle_detector
+  obstacle_detector_main
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY include/
+  DESTINATION include
 )
 
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
@@ -49,4 +58,6 @@ if(BUILD_TESTING)
 endif()
 
 ament_export_dependencies(${dependencies})
+ament_export_include_directories(include)
+ament_export_libraries(${PROJECT_NAME})
 ament_package()

@@ -1,4 +1,4 @@
-# Copyright 2021 Intelligent Robotics Lab
+# Copyright 2023 Intelligent Robotics Lab
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,20 +18,19 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
 
-    vff_avoidance_cmd = Node(
+    obstacle_detector_cmd = Node(
       package='obstacle_detector',
-      executable='avoidance_vff',
+      executable='obstacle_detector_main',
       parameters=[{
         'use_sim_time': True
       }],
       remappings=[
-        ('input_scan', '/scan_raw'),
-        ('output_vel', '/nav_vel')
+        ('input_scan', '/scan_raw')
       ],
       output='screen'
     )
 
     ld = LaunchDescription()
-    ld.add_action(vff_avoidance_cmd)
+    ld.add_action(obstacle_detector_cmd)
 
     return ld
