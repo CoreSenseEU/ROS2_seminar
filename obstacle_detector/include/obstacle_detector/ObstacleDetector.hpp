@@ -22,17 +22,17 @@
 
 namespace obstacle_detector
 {
-    //! A function that detects the point of the nearest obstacle
-    /*!
-      \sa get_obstacle()
-      \param distances the laser readings.
-      \param angle_min the starting angle of the reading.
-      \param angle_increment the angle increment for reading i to i+1.
-      \return An optional that contains the 3D coordinate of the nearest point
-      \sa QTstyle_Test(), ~QTstyle_Test(), testMeToo() and publicVar()
-    */ 
-    std::optional<tf2::Vector3>
-    get_obstacle(const std::vector<float> & distances, float angle_min, float angle_increment);
+//! A function that detects the point of the nearest obstacle
+/*!
+  \sa get_obstacle()
+  \param distances the laser readings.
+  \param angle_min the starting angle of the reading.
+  \param angle_increment the angle increment for reading i to i+1.
+  \return An optional that contains the 3D coordinate of the nearest point
+  \sa QTstyle_Test(), ~QTstyle_Test(), testMeToo() and publicVar()
+*/
+std::optional<tf2::Vector3>
+get_obstacle(const std::vector<float> & distances, float angle_min, float angle_increment);
 
 }  // namespace obstacle_detector
 

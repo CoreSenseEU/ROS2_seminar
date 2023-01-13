@@ -18,12 +18,23 @@
 
 #include "sensor_msgs/msg/laser_scan.hpp"
 #include "geometry_msgs/msg/point_stamped.hpp"
+#include "obstacle_detector/ObstacleDetectorNode.hpp"
 #include "obstacle_detector/ObstacleDetector.hpp"
 
 #include "rclcpp/rclcpp.hpp"
 #include "gtest/gtest.h"
 
 using namespace std::chrono_literals;
+
+class ObstacleDetectorNodeTest : public obstacle_detector::ObstacleDetectorNode
+{
+public:
+  std::optional<geometry_msgs::msg::PointStamped>
+  get_obstacle_test(const sensor_msgs::msg::LaserScan & scan)
+  {
+    return get_obstacle(scan);
+  }
+};
 
 sensor_msgs::msg::LaserScan get_scan_test_1(rclcpp::Time ts)
 {
@@ -90,6 +101,85 @@ TEST(obstacle_detector_tests, get_obstacle)
   ASSERT_LT(res3.value().x(), -0.0f);
   ASSERT_LT(res3.value().y(), -0.0f);
   ASSERT_NEAR(res3.value().z(), 0.0f, 0.00001f);
+}
+
+TEST(obstacle_detector_tests, get_obstacle_node)
+{
+  auto node_obstacle = ObstacleDetectorNodeTest();
+
+  rclcpp::Time ts = node_obstacle.now();
+
+  auto res1 = node_obstacle.get_obstacle_test(get_scan_test_1(ts));
+  ASSERT_FALSE(res1.has_value());
+
+  auto res2 = node_obstacle.get_obstacle_test(get_scan_test_2(ts));
+  ASSERT_TRUE(res2.has_value());
+  ASSERT_NEAR(res2.value().point.x, 0.0f, 0.00001f);
+  ASSERT_NEAR(res2.value().point.y, 0.0f, 0.00001f);
+  ASSERT_NEAR(res2.value().point.z, 0.0f, 0.00001f);
+
+  auto res3 = node_obstacle.get_obstacle_test(get_scan_test_3(ts));
+  ASSERT_TRUE(res3.has_value());
+  ASSERT_LT(res3.value().point.x, -0.0f);
+  ASSERT_LT(res3.value().point.y, -0.0f);
+  ASSERT_NEAR(res3.value().point.z, 0.0f, 0.00001f);
+}
+
+
+TEST(obstacle_detector_tests, ouput_vels)
+{
+  auto node_obstacle = std::make_shared<ObstacleDetectorNodeTest>();
+
+  // Create a testing node with a scan publisher and a speed subscriber
+  auto test_node = rclcpp::Node::make_shared("test_node");
+  auto scan_pub = test_node->create_publisher<sensor_msgs::msg::LaserScan>("input_scan", 100);
+
+  geometry_msgs::msg::PointStamped last_point;
+  int count = 0;
+  auto point_sub = test_node->create_subscription<geometry_msgs::msg::PointStamped>(
+    "obstacle_pose", 1, [&last_point, &count](geometry_msgs::msg::PointStamped::SharedPtr msg) {
+      last_point = *msg;
+      count++;
+    });
+
+  ASSERT_EQ(point_sub->get_publisher_count(), 1);
+  ASSERT_EQ(scan_pub->get_subscription_count(), 1);
+
+  rclcpp::Rate rate(30);
+  rclcpp::executors::SingleThreadedExecutor executor;
+  executor.add_node(node_obstacle);
+  executor.add_node(test_node);
+
+  // Test for scan test #1
+  auto start = node_obstacle->now();
+  while (rclcpp::ok() && (node_obstacle->now() - start) < 1s) {
+    scan_pub->publish(get_scan_test_1(node_obstacle->now()));
+    executor.spin_some();
+    rate.sleep();
+  }
+  ASSERT_EQ(count, 0);
+
+  // Test for scan test #2
+  start = node_obstacle->now();
+  while (rclcpp::ok() && (node_obstacle->now() - start) < 1s) {
+    scan_pub->publish(get_scan_test_2(node_obstacle->now()));
+    executor.spin_some();
+    rate.sleep();
+  }
+  ASSERT_NEAR(last_point.point.x, 0.0f, 0.0001f);
+  ASSERT_NEAR(last_point.point.y, 0.0f, 0.0001f);
+  ASSERT_NEAR(last_point.point.z, 0.0f, 0.0001f);
+
+  // Test for scan test #3
+  start = node_obstacle->now();
+  while (rclcpp::ok() && (node_obstacle->now() - start) < 1s) {
+    scan_pub->publish(get_scan_test_3(node_obstacle->now()));
+    executor.spin_some();
+    rate.sleep();
+  }
+  ASSERT_LT(last_point.point.x, -0.0f);
+  ASSERT_LT(last_point.point.y, -0.0f);
+  ASSERT_NEAR(last_point.point.z, 0.0f, 0.00001f);
 }
 
 int main(int argc, char ** argv)

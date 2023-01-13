@@ -22,12 +22,19 @@ set(dependencies
 include_directories(include)
 
 add_library(${PROJECT_NAME} SHARED
+  src/obstacle_detector/ObstacleDetectorNode.cpp
   src/obstacle_detector/ObstacleDetector.cpp
 )
 ament_target_dependencies(${PROJECT_NAME} ${dependencies})
+rclcpp_components_register_nodes(${PROJECT_NAME} "obstacle_detector::AvoidanceNode")
+
+add_executable(obstacle_detector_main src/obstacle_detector_main.cpp)
+ament_target_dependencies(obstacle_detector_main ${dependencies})
+target_link_libraries(obstacle_detector_main ${PROJECT_NAME})
 
 install(TARGETS
   ${PROJECT_NAME}
+  obstacle_detector_main
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME}
@@ -36,6 +43,8 @@ install(TARGETS
 install(DIRECTORY include/
   DESTINATION include
 )
+
+install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
